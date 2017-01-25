@@ -2,6 +2,12 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 var App = React.createClass({
+	getInitialState: function () {
+		return {
+			currentItems: []
+		}
+	},
+	
 	render: function () {
 		return (
 			<div>
@@ -9,19 +15,45 @@ var App = React.createClass({
 				<DeleteAllButton />
 				<SaveAllButton />
 				<LoadButton />
-				<div id = "list"></div>
+				<List currentItems = {this.state.currentItems}/>
 			</div>
 		)
 	}
 });
+
+var List = React.createClass({
+	
+	handleChange: function () {
+		this.setState({currentItems: this.getItemArray})
+		console.log(this.state.currentItems)
+	},
+	
+	getItemArray: function () {
+		var items = document.getElementById('list').querySelectorAll('p');
+		if (items) {
+			var itemsArray = [];
+			for (var i = 0; i < items.length; i++) {
+				itemsArray.push(items[i].innerHTML)
+				console.log("pushed: " + items[i].innerHTML)
+			}
+		return (itemsArray)
+		}
+	},
+	
+	render: function() {
+		return (
+			<div id = "list" onChange = {this.handleChange} ></div>
+		)
+	}
+})
 
 var Form = React.createClass({
 	description: "Add a new item",
 	handleSubmit: function (e) {
 		e.preventDefault();
 		//var value = e.target.childNodes[4].value;
-		var value = document.getElementsByClassName("form-input")[0].value
-		p = document.createElement("p");
+		var value = document.getElementById("form-input").value
+		var p = document.createElement("p");
 		p.innerHTML = "- " + value;
 		document.getElementById("list").appendChild(p);
 	},
@@ -29,7 +61,7 @@ var Form = React.createClass({
 		return (
 			<form onSubmit = {this.handleSubmit}>
 				{this.description}<br />
-				<input className = "form-input" type = "text" />
+				<input id = "form-input" type = "text" />
 				<input type = "submit" value = "Submit" />
 			</form>
 		)
@@ -54,12 +86,12 @@ var DeleteAllButton = React.createClass({
 var SaveAllButton = React.createClass ({
 	savedTexts: function () {
 		var items = document.getElementById('list').querySelectorAll('p');
-		var itemsArray = [];
+		var itemarray = [];
 		for (var i = 0; i < items.length; i++) {
-			itemsArray.push(items[i].innerHTML)
+			itemarray.push(items[i].innerHTML)
 			console.log("pushed: " + items[i].innerHTML)
 		}
-		return JSON.stringify(itemsArray);
+		return JSON.stringify(itemarray);
 	},
 	handleSaveClick: function (e) {
 		e.preventDefault();
@@ -81,7 +113,7 @@ var LoadButton = React.createClass ({
 			var savedTexts = JSON.parse(localStorage.getItem("items"));
 			if (savedTexts || savedTexts.length > 0) {
 				for (var i = 0; i < savedTexts.length; i++) {
-					p = document.createElement("p");
+					var p = document.createElement("p");
 					p.innerHTML = savedTexts[i];
 					document.getElementById("list").appendChild(p);
 				}
