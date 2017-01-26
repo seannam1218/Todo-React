@@ -8,10 +8,20 @@ var App = React.createClass({
 		}
 	},
 	
+	addItem: function(newItem) {
+		this.state.currentItems.push(newItem)
+		console.log("parent addItem function executed")
+		console.log(this.state.currentItems)
+	},
+	
+	deleteItems: function(selectedItem) {
+		this.state.currentItems.splice(selectedItem)
+	},
+	
 	render: function () {
 		return (
 			<div>
-				<Form />
+				<Form onSubmit = {this.addItem}/>
 				<DeleteAllButton />
 				<SaveAllButton />
 				<LoadButton />
@@ -22,40 +32,35 @@ var App = React.createClass({
 });
 
 var List = React.createClass({
-	
-	handleChange: function () {
-		this.setState({currentItems: this.getItemArray})
-		console.log(this.state.currentItems)
-	},
-	
-	getItemArray: function () {
-		var items = document.getElementById('list').querySelectorAll('p');
-		if (items) {
-			var itemsArray = [];
-			for (var i = 0; i < items.length; i++) {
-				itemsArray.push(items[i].innerHTML)
-				console.log("pushed: " + items[i].innerHTML)
-			}
-		return (itemsArray)
+	arrayToP: function(array) {
+		var result = "";
+		for (var i = 0; i < array.length; i++) {
+			result = result + "<p>" + array[i] + "</p>"
+			console.log(result)
+			
 		}
+		return result
+		console.log(result)
 	},
 	
 	render: function() {
+		var result = "";
 		return (
-			<div id = "list" onChange = {this.handleChange} ></div>
+			<div id = "list">
+				{(this.props.currentItems)}
+			</div>
 		)
+		console.log("list updated")
 	}
 })
 
 var Form = React.createClass({
 	description: "Add a new item",
 	handleSubmit: function (e) {
+		console.log("form submitted")
 		e.preventDefault();
-		//var value = e.target.childNodes[4].value;
 		var value = document.getElementById("form-input").value
-		var p = document.createElement("p");
-		p.innerHTML = "- " + value;
-		document.getElementById("list").appendChild(p);
+		this.props.onSubmit(value);
 	},
 	render: function () {
 		return (
