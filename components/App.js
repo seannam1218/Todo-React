@@ -9,8 +9,10 @@ var App = React.createClass({
 	},
 	
 	addItem: function(newItem) {
-		this.state.currentItems.push(newItem)
-		console.log("parent addItem function executed")
+		var newCurrentItems = this.state.currentItems.concat(newItem)
+		this.setState ({
+			currentItems: newCurrentItems
+		})
 		console.log(this.state.currentItems)
 	},
 	
@@ -22,46 +24,25 @@ var App = React.createClass({
 		return (
 			<div>
 				<Form onSubmit = {this.addItem}/>
-				<DeleteAllButton />
-				<SaveAllButton />
-				<LoadButton />
-				<List currentItems = {this.state.currentItems}/>
+				<button>delete all</button>
+				<button>save all</button>
+				<button>load</button>
+				<List currentItems = {this.state.currentItems} />
 			</div>
 		)
 	}
 });
 
-var List = React.createClass({
-	arrayToP: function(array) {
-		var result = "";
-		for (var i = 0; i < array.length; i++) {
-			result = result + "<p>" + array[i] + "</p>"
-			console.log(result)
-			
-		}
-		return result
-		console.log(result)
-	},
-	
-	render: function() {
-		var result = "";
-		return (
-			<div id = "list">
-				{(this.props.currentItems)}
-			</div>
-		)
-		console.log("list updated")
-	}
-})
-
 var Form = React.createClass({
 	description: "Add a new item",
+	
 	handleSubmit: function (e) {
-		console.log("form submitted")
 		e.preventDefault();
-		var value = document.getElementById("form-input").value
-		this.props.onSubmit(value);
+		var newItem = document.getElementById("form-input").value
+		console.log("var newItem = " + document.getElementById("form-input").value)
+		this.props.onSubmit(newItem);
 	},
+	
 	render: function () {
 		return (
 			<form onSubmit = {this.handleSubmit}>
@@ -73,61 +54,22 @@ var Form = React.createClass({
 	}
 })
 
-var DeleteAllButton = React.createClass({
-	handleClick: function (e) {
-		e.preventDefault();
-		var confirmDelete = confirm("Are you sure you want to delete every item on the list?");
-		if (confirmDelete) {
-			document.getElementById('list').innerHTML = "";
+var List = React.createClass({
+	itemPChain: function () {
+		console.log("starting itemPChain")
+		if (this.props.currentItems[0]) {
+			var itemPs = this.props.currentItems.map(function (item) {
+				return ("<p>" + item + "</p>")
+			})
+			console.log(itemPs)
+			return (itemPs)	
 		}
+		return []
 	},
-	render: function () {
+	
+	render : function () {
 		return (
-			<button onClick = {this.handleClick}>Delete all</button>
-		)
-	}
-})
-
-var SaveAllButton = React.createClass ({
-	savedTexts: function () {
-		var items = document.getElementById('list').querySelectorAll('p');
-		var itemarray = [];
-		for (var i = 0; i < items.length; i++) {
-			itemarray.push(items[i].innerHTML)
-			console.log("pushed: " + items[i].innerHTML)
-		}
-		return JSON.stringify(itemarray);
-	},
-	handleSaveClick: function (e) {
-		e.preventDefault();
-		localStorage.setItem("items", this.savedTexts())
-	},
-	render: function () {
-		return (
-			<button onClick = {this.handleSaveClick}>Save work</button>
-		)
-	}
-})
-
-var LoadButton = React.createClass ({
-	handleLoadClick: function (e) {
-		e.preventDefault();
-		var confirmDelete = confirm("Current list will be deleted, and saved list will be loaded. Do you wish to continue?");
-		if (confirmDelete) {
-			document.getElementById('list').innerHTML = "";
-			var savedTexts = JSON.parse(localStorage.getItem("items"));
-			if (savedTexts || savedTexts.length > 0) {
-				for (var i = 0; i < savedTexts.length; i++) {
-					var p = document.createElement("p");
-					p.innerHTML = savedTexts[i];
-					document.getElementById("list").appendChild(p);
-				}
-			}
-		} 
-	},
-	render:function() {
-		return(
-			<button onClick = {this.handleLoadClick}>Load work</button>
+			<div>{this.itemPChain()}</div>
 		)
 	}
 })
