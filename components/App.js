@@ -4,25 +4,31 @@ var ReactDOM = require('react-dom');
 var App = React.createClass({
 	getInitialState: function () {
 		return {
-			currentItems: []
+			currentItems: [],
+			deleteIcons: [],
+			editIcons: []
 		}
 	},
 	
 	addItem: function(newItem) {
 		var newCurrentItems = this.state.currentItems.concat(newItem)
+		console.log("adding new item!")
 		this.setState ({
 			currentItems: newCurrentItems
 		})
+		console.log("finished adding new item! currentItems:" + this.state.currentItems)
 	},
 	
 	handleDeleteAll: function (e) {
-		console.log("currentItems state deleted")
+		console.log("currentItems state emptied")
 		this.setState ({
 			currentItems: []
 		})
+		console.log("C")
 	},
 	
 	componentDidUpdate: function (prevProps, prevState) {
+		console.log("E")
 		console.log("currentItems = " + this.state.currentItems)
 	},
 	
@@ -36,15 +42,15 @@ var App = React.createClass({
 				<Form onSubmit = {this.addItem} />
 				<DeleteAllButton onClick = {this.handleDeleteAll} />
 				<SaveAllButton currentItems = {this.state.currentItems} />
-				<button>load</button>
-				<List currentItems = {this.state.currentItems} />
+				<button>load work</ button>
+				<List currentItems = {this.state.currentItems} deleteIcons = {this.state.deleteIcons} editIcons = {this.state.editIcons} />
 			</div>
 		)
 	}
 });
 
 var Form = React.createClass({
-	getInitialState: function () { ///-------------------------------------------------fix
+	getInitialState: function () { 
 		return {
 			value: ""
 		}
@@ -52,15 +58,14 @@ var Form = React.createClass({
 	
 	description: "Add a new item",
 	
+	handleValueChange: function (e) {
+		this.setState ({
+			value: e.target.value
+		})
+	},
+	
 	handleSubmit: function (e) {
 		e.preventDefault();
-		/*var newItem = e.target.childNodes[4].value;
-		this.props.onSubmit(newItem);*/
-		console.log("value is = " + e.target.childNodes[4].value )
-		this.setState ({
-			value: e.target.childNodes[4].value
-		}) 
-		console.log("state of value is now:" + this.state.value)
 		this.props.onSubmit(this.state.value);
 	},
 	
@@ -68,7 +73,7 @@ var Form = React.createClass({
 		return (
 			<form onSubmit = {this.handleSubmit}>
 				{this.description}<br />
-				<input id = "form-input" type = "text" />
+				<input id = "form-input" type = "text" onChange = {this.handleValueChange}/>
 				<input type = "submit" value = "Submit" />
 			</form>
 		)
@@ -76,9 +81,10 @@ var Form = React.createClass({
 })
 
 var List = React.createClass({
+	
 	itemPChain: function () {
 		console.log("starting itemPChain")
-		if (this.props.currentItems[0]) {
+		if (this.props.currentItems !== null) {
 			var itemPs = this.props.currentItems.map(function (item) {
 				return (<p>{item}</p>)
 			})
@@ -87,9 +93,11 @@ var List = React.createClass({
 		return []
 	},
 	
+	
+	
 	render : function () {
 		return (
-			<div id = "mainList">
+			<div id = "main-list">
 				{this.itemPChain()}
 			</div>
 		)
@@ -101,13 +109,18 @@ var DeleteAllButton = React.createClass({
 		e.preventDefault();
 		var confirmDelete = confirm("Are you sure you want to delete every item on the list?");
 		if (confirmDelete) {
-			document.getElementById('mainList').innerHTML = "";
+			console.log("A")
+			document.getElementById('main-list').innerHTML = "";
+			console.log("B")
 			this.props.onClick(e);
+			console.log("D")
 		}
 	},
 	render: function () {
 		return (
 			<button onClick = {this.handleClick}>Delete all</button>
+			//
+			
 		)
 	}
 })
@@ -144,9 +157,10 @@ var LoadButton = React.createClass ({
 		e.preventDefault();
 		var confirmDelete = confirm("Current list will be deleted, and saved list will be loaded. Do you wish to continue?");
 		if (confirmDelete) {
-			document.getElementById('list').innerHTML = "";
+			document.getElementById('main-list').innerHTML = "";
 			var savedTexts = JSON.parse(localStorage.getItem("items"));
-			if (savedTexts || savedTexts.length > 0) {
+			console.log(savedTexts)
+			if (savedTexts.length > 0) {
 				for (var i = 0; i < savedTexts.length; i++) {
 					var p = document.createElement("p");
 					p.innerHTML = savedTexts[i];
