@@ -5,6 +5,7 @@ var App = React.createClass({
 	getInitialState: function () {
 		return {
 			currentItems: [],
+			savedItems: [],
 			deleteIcons: [],
 			editIcons: []
 		}
@@ -16,33 +17,44 @@ var App = React.createClass({
 		this.setState ({
 			currentItems: newCurrentItems
 		})
-		console.log("finished adding new item! currentItems:" + this.state.currentItems)
 	},
 	
 	handleDeleteAll: function (e) {
-		console.log("currentItems state emptied")
 		this.setState ({
 			currentItems: []
 		})
-		console.log("C")
+	},
+	
+	handleSaveAll: function (e) {
+		this.setState ({
+			savedItems: this.state.currentItems
+		})
+	},
+	
+	handleLoad: function (e) {
+		this.setState ({
+			currentItems: this.state.savedItems
+		})
 	},
 	
 	componentDidUpdate: function (prevProps, prevState) {
-		console.log("E")
 		console.log("currentItems = " + this.state.currentItems)
+		console.log("savedItems = " + this.state.savedItems)
 	},
 	
+	/*
 	deleteItems: function(selectedItem) {
 		this.state.currentItems.splice(selectedItem)
 	},
+	*/
 	
 	render: function () {
 		return (
 			<div>
 				<Form onSubmit = {this.addItem} />
 				<DeleteAllButton onClick = {this.handleDeleteAll} />
-				<SaveAllButton currentItems = {this.state.currentItems} />
-				<button>load work</ button>
+				<SaveAllButton onClick = {this.handleSaveAll} savedItems = {this.state.savedItems}/>
+				<LoadButton onClick = {this.handleLoad} />
 				<List currentItems = {this.state.currentItems} deleteIcons = {this.state.deleteIcons} editIcons = {this.state.editIcons} />
 			</div>
 		)
@@ -93,8 +105,6 @@ var List = React.createClass({
 		return []
 	},
 	
-	
-	
 	render : function () {
 		return (
 			<div id = "main-list">
@@ -109,18 +119,13 @@ var DeleteAllButton = React.createClass({
 		e.preventDefault();
 		var confirmDelete = confirm("Are you sure you want to delete every item on the list?");
 		if (confirmDelete) {
-			console.log("A")
-			document.getElementById('main-list').innerHTML = "";
-			console.log("B")
-			this.props.onClick(e);
-			console.log("D")
+			this.props.onClick(e)
 		}
 	},
+	
 	render: function () {
 		return (
 			<button onClick = {this.handleClick}>Delete all</button>
-			//
-			
 		)
 	}
 })
@@ -132,49 +137,38 @@ var SaveAllButton = React.createClass ({
 		}
 	},
 	
-	handleSaveClick: function (e) {
+	handleClick: function (e) {
 		e.preventDefault();
-		this.setState ({
-			savedItems: this.props.currentItems
-		})
+		this.props.onClick(e);
 	},
 	
 	componentDidUpdate: function (prevProps, prevState) {
-		var savedJSON = JSON.stringify(this.state.savedItems)
+		var savedJSON = JSON.stringify(this.props.savedItems)
 		localStorage.setItem("savedItems", savedJSON)
-		console.log("saved items = " + this.state.savedItems)
 	},
 	
 	render: function () {
 		return (
-			<button onClick = {this.handleSaveClick}>Save work</button>
+			<button onClick = {this.handleClick}>Save work</button>
 		)
 	}
 })
-/*
+
 var LoadButton = React.createClass ({
-	handleLoadClick: function (e) {
+	handleClick: function (e) {
 		e.preventDefault();
-		var confirmDelete = confirm("Current list will be deleted, and saved list will be loaded. Do you wish to continue?");
+		var confirmDelete = confirm("The current list will be deleted. Continue?");
 		if (confirmDelete) {
-			document.getElementById('main-list').innerHTML = "";
-			var savedTexts = JSON.parse(localStorage.getItem("items"));
-			console.log(savedTexts)
-			if (savedTexts.length > 0) {
-				for (var i = 0; i < savedTexts.length; i++) {
-					var p = document.createElement("p");
-					p.innerHTML = savedTexts[i];
-					document.getElementById("list").appendChild(p);
-				}
-			}
-		} 
+			this.props.onClick(e)
+		}
 	},
+	
 	render:function() {
 		return(
-			<button onClick = {this.handleLoadClick}>Load work</button>
+			<button onClick = {this.handleClick}>Load work</button>
 		)
 	}
 })
-*/
+
 
 module.exports = App;
