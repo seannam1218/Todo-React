@@ -13,7 +13,6 @@ var App = React.createClass({
 	
 	addItem: function(newItem) {
 		var newCurrentItems = this.state.currentItems.concat(newItem)
-		console.log("adding new item!")
 		this.setState ({
 			currentItems: newCurrentItems
 		})
@@ -37,25 +36,25 @@ var App = React.createClass({
 		})
 	},
 	
+	handleDeleteItem: function (e) {
+		/*this.setState ({
+			currentItems: []
+		})*/
+	},
+	
 	componentDidUpdate: function (prevProps, prevState) {
 		console.log("currentItems = " + this.state.currentItems)
 		console.log("savedItems = " + this.state.savedItems)
 	},
-	
-	/*
-	deleteItems: function(selectedItem) {
-		this.state.currentItems.splice(selectedItem)
-	},
-	*/
 	
 	render: function () {
 		return (
 			<div>
 				<Form onSubmit = {this.addItem} />
 				<DeleteAllButton onClick = {this.handleDeleteAll} />
-				<SaveAllButton onClick = {this.handleSaveAll} savedItems = {this.state.savedItems}/>
+				<SaveAllButton onClick = {this.handleSaveAll} savedItems = {this.state.savedItems} />
 				<LoadButton onClick = {this.handleLoad} />
-				<List currentItems = {this.state.currentItems} deleteIcons = {this.state.deleteIcons} editIcons = {this.state.editIcons} />
+				<List currentItems = {this.state.currentItems} onDelete = {this.handleDeleteItem} />
 			</div>
 		)
 	}
@@ -70,6 +69,7 @@ var Form = React.createClass({
 	
 	description: "Add a new item",
 	
+	
 	handleValueChange: function (e) {
 		this.setState ({
 			value: e.target.value
@@ -78,7 +78,11 @@ var Form = React.createClass({
 	
 	handleSubmit: function (e) {
 		e.preventDefault();
-		this.props.onSubmit(this.state.value);
+		if (this.state.value !== "") {
+			this.props.onSubmit(this.state.value);
+		} else {
+			alert("Item must be at least 1 character long! Why would you add a blank item???")
+		}
 	},
 	
 	render: function () {
@@ -93,23 +97,82 @@ var Form = React.createClass({
 })
 
 var List = React.createClass({
-	
-	itemPChain: function () {
-		console.log("starting itemPChain")
+	/*makeListItems: function () {
 		if (this.props.currentItems !== null) {
 			var itemPs = this.props.currentItems.map(function (item) {
-				return (<p>{item}</p>)
+				return (
+					<li>
+						{item} <DeleteIcon onClick = {this.handleDelete} />
+					</li>
+				)
 			})
 			return (itemPs)	
 		}
 		return []
+	},*/
+	handleDelete : function () {
+		this.props.onDelete();
+	},
+	
+	makeListItems : function () {
+		var listItems = this.props.currentItems.map(function (item) {
+			return (
+				<ListItem key={item.id} value={item} onDelete = {this.handleDelete} />
+			)
+		})
+		return listItems
 	},
 	
 	render : function () {
 		return (
-			<div id = "main-list">
-				{this.itemPChain()}
-			</div>
+			<ul>
+				{this.makeListItems()}
+			</ul>
+		)
+	}
+})
+
+var ListItem = React.createClass({
+	handleDelete: function (e) {
+		this.props.onDelete()
+	},
+	
+	render: function () {
+		return (
+			<li> 
+				{this.props.value} 
+				<DeleteIcon onClick = {this.handleDelete} />
+			</li>
+		)
+	}
+})
+
+var DeleteIcon = React.createClass ({
+	deleteIconSrc: "https://cdn3.iconfinder.com/data/icons/google-material-design-icons/48/ic_delete_48px-128.png",
+	iconWidth: 20,
+	
+	handleClick: function (e) {
+		this.props.onClick(e)
+	},
+	
+	render: function() {
+		return (
+			<img src = {this.deleteIconSrc} width = {this.iconWidth} onClick = {this.handleClick} />
+		)
+	}
+})
+
+var EditIcon = React.createClass ({
+	editIconSrc: "https://cdn3.iconfinder.com/data/icons/google-material-design-icons/48/ic_mode_edit_48px-128.png",
+	iconWidth: 20,
+		
+	handleClick: function (e) {
+		var target = e.target
+	},
+	
+	render: function() {
+		return (
+			<img src = {this.editIconSrc} width = {this.iconWidth} onClick = {this.handleClick} />
 		)
 	}
 })
@@ -117,7 +180,7 @@ var List = React.createClass({
 var DeleteAllButton = React.createClass({
 	handleClick: function (e) {
 		e.preventDefault();
-		var confirmDelete = confirm("Are you sure you want to delete every item on the list?");
+		var confirmDelete = confirm("Are you sure you want to delete everything?");
 		if (confirmDelete) {
 			this.props.onClick(e)
 		}
