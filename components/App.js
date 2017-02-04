@@ -5,7 +5,7 @@ var App = React.createClass({
 	getInitialState: function () {
 		return {
 			currentItems: [],
-			savedItems: [],
+			savedItems: []
 		}
 	},
 	addItem: function(newItem) {
@@ -103,7 +103,7 @@ var App = React.createClass({
 					<SaveAllButton onClick = {this.handleSaveAll} savedItems = {this.state.savedItems} />
 					<LoadButton onClick = {this.handleLoad} />
 				</div>
-				<h1>The Amazing Todo-List</h1>
+				<h1>The Amazing Todo-List </h1>
 				<List
 					currentItems = {this.state.currentItems}
 					onDelete = {this.handleDeleteItem}
