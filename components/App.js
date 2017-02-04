@@ -10,44 +10,36 @@ var App = React.createClass({
 	},
 	
 	addItem: function(newItem) {
-		var newCurrentItems = this.state.currentItems.concat(newItem)
 		this.setState ({
-			currentItems: newCurrentItems
+			currentItems: this.state.currentItems.concat(newItem)
 		})
 	},
 	
 	handleDeleteAll: function (e) {
-		var newBlankList = this.makeBlankCurrentItems()
 		this.setState ({
-			currentItems: newBlankList
+			currentItems: []
 		})
 	},
 	
-	makeBlankCurrentItems: function() {
-		for (var i = 0; i < this.state.currentItems.length; i++) {
-			this.state.currentItems.splice(0)
-		}
-		return this.state.currentItems
-	},
-	
 	handleSaveAll: function (e) {
-		var newSavedItems = this.state.currentItems
+		//saveTag variable is used to help computer distinguish between the saveItems and currentItems list. 
+		//Otherwise, editing function affects the saved list (as well as currentList) for some unknown reason.
+		var saveTag = "saveTag"  
 		this.setState ({
-			savedItems: newSavedItems
+			savedItems: this.state.currentItems.concat(saveTag)
 		})
 	},
 	
 	handleLoad: function (e) {
-		var newCurrentItems = this.state.savedItems
+		var savedItemsTagRemoved = this.state.savedItems.slice(0, this.state.savedItems.length-1)
 		this.setState ({
-			currentItems: newCurrentItems
+			currentItems: savedItemsTagRemoved
 		})
 	},
 	
 	handleDeleteItem: function (e, target) {
-		var newCurrentItems = this.makeDeletedCurrentItems(e, target)
 		this.setState ({
-			currentItems: newCurrentItems
+			currentItems: this.makeDeletedCurrentItems(e, target)
 		})
 	},
 	
@@ -62,20 +54,21 @@ var App = React.createClass({
 	
 	handleEditItem: function (e, target) {
 		var editPrompt = prompt("How would you like to change it?", target)
-		if (this.state.currentItems.includes(editPrompt)) {
-			alert(editPrompt + ": This item already exists in the list!")
+		if (!editPrompt) {
+			return
+		} else if (this.state.currentItems.includes(editPrompt)) {
+			alert(editPrompt + ": This item already exists on the list!")
 			return
 		} else if (editPrompt !== target) {
-			var newCurrentItems = this.makeEditedCurrentItems(target, editPrompt)
 			this.setState ({
-				currentItems: newCurrentItems
+				currentItems: this.makeEditedCurrentItems(target, editPrompt)
 			})
 		} 
 	},
 	
 	makeEditedCurrentItems: function(target, editPrompt) {
 		for (var i = 0; i < this.state.currentItems.length; i++) {
-			if (this.state.currentItems[i] == target) {
+			if (this.state.currentItems[i] === target) {
 				this.state.currentItems.splice(i, 1, editPrompt)
 			} 
 		}	
@@ -90,10 +83,12 @@ var App = React.createClass({
 	render: function () {
 		return (
 			<div>
-				<Form currentItems = {this.state.currentItems} onSubmit = {this.addItem} />
-				<DeleteAllButton onClick = {this.handleDeleteAll} />
-				<SaveAllButton onClick = {this.handleSaveAll} savedItems = {this.state.savedItems} />
-				<LoadButton onClick = {this.handleLoad} />
+				<div className = "formDiv">
+					<Form currentItems = {this.state.currentItems} onSubmit = {this.addItem} />
+					<DeleteAllButton onClick = {this.handleDeleteAll} />
+					<SaveAllButton onClick = {this.handleSaveAll} savedItems = {this.state.savedItems} />
+					<LoadButton onClick = {this.handleLoad} />
+				</div>
 				<List currentItems = {this.state.currentItems} onDelete = {this.handleDeleteItem} onEdit = {this.handleEditItem} />
 			</div>
 		)
@@ -195,7 +190,6 @@ var EditIcon = React.createClass ({
 	handleClick: function (e) {
 		console.log("clicked! - EditIcon")
 		var target = e.target.parentElement.id
-		console.log(target)
 		this.props.onEdit(e, target)
 	},
 	
